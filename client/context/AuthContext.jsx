@@ -1,79 +1,89 @@
-import React, { createContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
-import { toast } from "react-toastify";
+import io from "socket.io-client";
 
 export const AuthContext = createContext();
 
-const AuthContextProvider = ({ children }) => {
+export const AuthContextProvider = ({ children }) => {
   const [authUser, setAuthUser] = useState(null);
-  const [token, setToken] = useState("");
+  const [socket, setSocket] = useState(null);
+  const [onlineUsers, setOnlineUsers] = useState([]);
 
-  const backendURL = import.meta.env.VITE_BACKEND_URL; // ✅ use VITE_BACKEND_URL
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return;
 
-  const login = async (endpoint, payload) => {
-    try {
-      const { data } = await axios.post(`${backendURL}/api/auth/${endpoint}`, payload);
+        const res = await axios.get(
+          `${import.meta.env.VITE_BACKEND_URL}/api/auth/check`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            withCredentials: true,
+          }
+        );
 
-      if (data.success) {
-        setAuthUser(data.user);
-        setToken(data.token);
-        localStorage.setItem("token", data.token);
-        axios.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
-        toast.success("Login successful");
-        return true;
-      } else {
-        toast.error(data.message);
-        return false;
+        setAuthUser(res.data.user);
+      } catch (error) {
+        console.log("Auth check failed");
+        setAuthUser(null);
       }
+    };
+
+    checkAuth();
+  }, []);
+
+  useEffect(() => {
+    if (authUser) {
+      const socket = io(import.meta.env.VITE_BACKEND_URL, {
+        query: { userId: authUser._id },
+      });
+
+      setSocket(socket);
+
+      socket.on("getOnlineUsers", (users) => {
+        setOnlineUsers(users);
+      });
+
+      return () => socket.close();
+    }
+  }, [authUser]);
+
+  const login = async (email, password) => {
+    try {
+      const res = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/api/auth/login`,
+        { email, password },
+        { withCredentials: true }
+      );
+
+      localStorage.setItem("token", res.data.token);
+      setAuthUser(res.data.user);
+      return true;
     } catch (error) {
-      toast.error(error?.response?.data?.message || "Login failed");
       return false;
     }
   };
 
-  const logout = () => {
-    setAuthUser(null);
-    setToken("");
+  const logout = async () => {
     localStorage.removeItem("token");
-    delete axios.defaults.headers.common["Authorization"];
+    setAuthUser(null);
   };
-
-  const checkAuth = async () => {
-    try {
-      const storedToken = localStorage.getItem("token");
-      if (!storedToken) return;
-
-      const { data } = await axios.get(`${backendURL}/api/auth/check`, {
-        headers: {
-          Authorization: `Bearer ${storedToken}`,
-        },
-      });
-
-      if (data.success) {
-        setAuthUser(data.user);
-      } else {
-        logout();
-      }
-    } catch (error) {
-      logout();
-      toast.error("Authentication failed");
-    }
-  };
-
-  useEffect(() => {
-    const storedToken = localStorage.getItem("token");
-    if (storedToken) {
-      setToken(storedToken);
-      axios.defaults.headers.common["Authorization"] = `Bearer ${storedToken}`;
-      checkAuth();
-    }
-  }, []);
 
   return (
-    <AuthContext.Provider value={{ authUser, login, logout }}>
+    <AuthContext.Provider
+      value={{
+        authUser,
+        setAuthUser,
+        socket,
+        onlineUsers,
+        login,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
 };
 
-export default AuthContextProvider;
+export const useAuthContext = () => useContext(AuthContext);

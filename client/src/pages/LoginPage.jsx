@@ -2,6 +2,7 @@ import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import assets from '../assets/assets';
 import { AuthContext } from '../../context/AuthContext.jsx';
+import toast from 'react-hot-toast';
 
 const LoginPage = () => {
   const [currState, setCurrState] = useState("Sign up");
@@ -33,9 +34,14 @@ const LoginPage = () => {
     }
 
     const endpoint = currState === "Sign up" ? 'signup' : 'login';
-    const success = await login(endpoint, payload);
+    const success = await login(email, password);
 
-    if (success) navigate("/");
+    if (success) {
+      toast.success("Logged in successfully!");
+      navigate("/");
+    } else {
+      toast.error("Login failed. Please check your credentials.");
+    }
   };
 
   return (

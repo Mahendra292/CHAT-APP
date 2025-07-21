@@ -7,8 +7,8 @@ const ProfilePage = () => {
   const { authUser, updateProfile } = useContext(AuthContext);
 
   const [selectedImg, setSelectedImg] = useState(null);
-  const [name, setName] = useState('');
-  const [bio, setBio] = useState('');
+  const [name, setName] = useState(authUser.fullName);
+  const [bio, setBio] = useState(authUser.bio);
   const navigate = useNavigate();
 
   // Set initial form values based on current user
@@ -100,8 +100,8 @@ const ProfilePage = () => {
         </form>
 
         <img
-          className="max-w-44 aspect-square rounded-full mx-10 max-sm:mt-10"
-          src={assets.logo_icon}
+          className={`max-w-44 aspect-square rounded-full mx-10 max-sm:mt-10 ${selectedImg && 'rounded-full'}`}
+          src={authUser?.profilePic ||assets.logo_icon}
           alt="App Logo"
         />
       </div>
