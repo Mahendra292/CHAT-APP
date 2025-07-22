@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import Sidebar from '../components/Sidebar'
 import ChatContainer from '../components/ChatContainer'
 import RightSidebar from '../components/RightSidebar'
+import bgImage from '../assets/bgImage.svg';
 
 export const HomePage = () => {
   const [selectedUser, setSelectedUser] = useState(false)
@@ -10,7 +11,7 @@ export const HomePage = () => {
     <div
       className="border w-full h-screen sm:px-[15%] sm:py-[5%]"
       style={{
-        backgroundImage: "url('./src/assets/bgImage.svg')",
+        backgroundImage: `url(${bgImage})`,
         backgroundRepeat: "no-repeat",
         backgroundSize: "cover",
         backgroundPosition: "center"

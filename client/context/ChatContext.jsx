@@ -41,7 +41,7 @@ export const ChatProvider = ({ children }) => {
             toast.error(error.message || "Failed to fetch users");
         }
     };
-
+ // function to get messages for selectd user
     const getMessages = async (userId) => {
         try {
             const { data } = await axiosInstance.get(`/api/messages/${userId}`);
@@ -52,6 +52,8 @@ export const ChatProvider = ({ children }) => {
             toast.error(error.message);
         }
     };
+    
+    //function to send message to selected user
 
     const sendMessage = async (messageData) => {
         try {
@@ -99,12 +101,12 @@ export const ChatProvider = ({ children }) => {
         users,
         selectedUser,
         getUsers,
-        setMessages,
+        getMessages,
         sendMessage,
         setSelectedUser,
         unseenMessages,
-        setUnseenMessages,
-        getMessages,
+        setUnseenMessages
+       
     };
 
     return (
