@@ -81,6 +81,25 @@ export const AuthContextProvider = ({ children }) => {
     }
   };
 
+  const updateProfile = async (updatedData) => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.put(
+        `${import.meta.env.VITE_BACKEND_URL}/api/auth/update-profile`,
+        updatedData,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true,
+        }
+      );
+
+      // ✅ Fix: Use "res.data.user" instead of just res.data to prevent logout
+      setAuthUser(res.data.user || res.data);
+    } catch (error) {
+      console.error("Update profile failed", error);
+    }
+  };
+
   const logout = async () => {
     localStorage.removeItem("token");
     setAuthUser(null);
@@ -96,6 +115,7 @@ export const AuthContextProvider = ({ children }) => {
         login,
         signup,
         logout,
+        updateProfile,
       }}
     >
       {children}
