@@ -9,13 +9,13 @@ import { Server } from "socket.io";
 
 // Create express app and HTTP server
 const app = express();
-const httpServer = http.createServer(app);
+const server = http.createServer(app);
 
 // Initialize socket.io server
-export const io = new Server(httpServer, {
+export const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173", // ✅ Exact origin
-    credentials: true                // ✅ Important for cookies/headers
+    origin: "*", 
+    credentials: true                
   },
 });
 
@@ -44,10 +44,7 @@ io.on("connection", (socket) => {
 
 // Middleware setup
 app.use(express.json({ limit: '4mb' }));
-app.use(cors({
-  origin: "http://localhost:5173",
-  credentials: true,
-}));
+app.use(cors());
 
 // Routes
 app.use("/api/status", (req, res) => res.send("server is live"));
@@ -59,7 +56,7 @@ await connectDB();
 
 if(process.env.NODE_ENV !== "production"){
 const PORT = process.env.PORT || 5000;
-httpServer.listen(PORT, () => console.log("Server is running on port: " + PORT));
+server.listen(PORT, () => console.log("Server is running on port: " + PORT));
 }
 
 // export server for vercel
