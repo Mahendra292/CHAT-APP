@@ -65,6 +65,22 @@ export const AuthContextProvider = ({ children }) => {
     }
   };
 
+  const signup = async (fullName, email, password, bio) => {
+    try {
+      const res = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/api/auth/signup`,
+        { fullName, email, password, bio },
+        { withCredentials: true }
+      );
+
+      localStorage.setItem("token", res.data.token);
+      setAuthUser(res.data.user);
+      return true;
+    } catch (error) {
+      return false;
+    }
+  };
+
   const logout = async () => {
     localStorage.removeItem("token");
     setAuthUser(null);
@@ -78,6 +94,7 @@ export const AuthContextProvider = ({ children }) => {
         socket,
         onlineUsers,
         login,
+        signup,
         logout,
       }}
     >

@@ -29,7 +29,21 @@ export const signUp = async (req, res) => {
 
     await newUser.save();
 
-    res.status(201).json({ success: true, message: "Account created successfully" });
+    // ✅ Generate token and return user like in login
+    const token = jwt.sign({ id: newUser._id }, JWT_SECRET, { expiresIn: "7d" });
+
+    res.status(201).json({
+      success: true,
+      message: "Account created successfully",
+      token,
+      user: {
+        _id: newUser._id,
+        fullName: newUser.fullName,
+        email: newUser.email,
+        bio: newUser.bio,
+        profilePic: newUser.profilePic,
+      },
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: "Error creating account" });
   }

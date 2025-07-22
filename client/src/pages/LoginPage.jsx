@@ -13,7 +13,7 @@ const LoginPage = () => {
   const [isDataSubmitted, setIsDataSubmitted] = useState(false);
 
   const navigate = useNavigate();
-  const { login } = useContext(AuthContext);
+  const { login, signup } = useContext(AuthContext);
 
   const onSubmitHandler = async (event) => {
     event.preventDefault();
@@ -23,24 +23,23 @@ const LoginPage = () => {
       return;
     }
 
-    const payload = {
-      email,
-      password,
-    };
+    let success = false;
 
     if (currState === "Sign up") {
-      payload.fullName = fullName;
-      payload.bio = bio;
+      success = await signup(fullName, email, password, bio);
+    } else {
+      success = await login(email, password);
     }
 
-    const endpoint = currState === "Sign up" ? 'signup' : 'login';
-    const success = await login(email, password);
-
     if (success) {
-      toast.success("Logged in successfully!");
+      if (currState === "Sign up") {
+        toast.success("Account created successfully!");
+      } else {
+        toast.success("Logged in successfully!");
+      }
       navigate("/");
     } else {
-      toast.error("Login failed. Please check your credentials.");
+      toast.error("Authentication failed. Please check your details.");
     }
   };
 
