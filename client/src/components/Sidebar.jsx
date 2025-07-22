@@ -77,7 +77,7 @@ const Sidebar = () => {
         {filteredusers.map((user, index) => (
           <div
             onClick={() => {
-              setSelectedUser(user);
+              setSelectedUser(user); setUnseenMessages(prev=>({...prev, [user._id]:0}))
             }}
             key={user.id || index}
             className={`relative flex items-center gap-2 p-2 pl-2 rounded cursor-pointer max-sm:text-sm ${

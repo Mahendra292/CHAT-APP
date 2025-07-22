@@ -79,7 +79,11 @@ const ChatContainer = () => {
             }`}
           >
             {msg.image ? (
-              <img src={msg.image} alt="Message" />
+              <img
+                src={msg.image}
+                alt="Message"
+                className="max-w-[200px] max-h-[200px] rounded-lg object-cover"
+              />
             ) : (
               <p
                 className={`p-2 max-w-[200px] md:text-sm font-light rounded-lg mb-8 break-all bg-violet-500/30 text-white ${
