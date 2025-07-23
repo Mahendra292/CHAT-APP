@@ -51,9 +51,6 @@ app.use("/api/status", (req, res) => res.send("server is live"));
 app.use("/api/auth", userRouter);
 app.use("/api/messages", messageRouter);
 
-app.get('/', (req, res) => {
-  res.send('Hello, world!'); // Responds with "Hello, world!" when a GET request is made to the root path (/)
-});
 
 // Connect DB and start server
 await connectDB();
