@@ -14,8 +14,9 @@ const server = http.createServer(app);
 // Initialize socket.io server
 export const io = new Server(server, {
   cors: {
-    origin: "*", 
-    credentials: true                
+    origin: "*", // For local testing, keeping this as '*' for now.
+                 // For production, change this to your client's specific Render URL (e.g., 'https://your-client-app.onrender.com')
+    credentials: true
   },
 });
 
@@ -44,7 +45,29 @@ io.on("connection", (socket) => {
 
 // Middleware setup
 app.use(express.json({ limit: '4mb' }));
-app.use(cors());
+
+// --- CORRECTED CORS CONFIGURATION FOR EXPRESS ROUTES ---
+// This is crucial for fixing the 'wildcard * with credentials' error.
+const allowedOrigins = [
+  'http://localhost:5173', // Your client's local development URL
+  // IMPORTANT: Add your deployed client's Render URL here once it's live.
+  // Example: 'https://your-client-app.onrender.com'
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // Allow requests with no origin (e.g., mobile apps, curl requests)
+    // or if the origin is in our allowed list.
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true // This allows cookies/auth headers to be sent
+}));
+// --- END CORRECTED CORS CONFIGURATION ---
+
 
 // Routes
 app.use("/api/status", (req, res) => res.send("server is live"));
@@ -55,10 +78,13 @@ app.use("/api/messages", messageRouter);
 // Connect DB and start server
 await connectDB();
 
-if(process.env.NODE_ENV !== "production"){
-const PORT = process.env.PORT || 5000;
+// --- CORRECTED SERVER LISTEN BLOCK ---
+// This block must be outside any 'if (process.env.NODE_ENV !== "production")'
+// to ensure the server listens on Render.
+const PORT = process.env.PORT || 5000; // Use Render's assigned port or 5000 for local dev
 server.listen(PORT, () => console.log("Server is running on port: " + PORT));
-}
+// --- END CORRECTED SERVER LISTEN BLOCK ---
 
-// export server for vercel
+
+// export server for vercel (this export is not directly used by Render for starting the app)
 export default server;
